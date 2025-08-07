@@ -1,0 +1,224 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  password    String   // SHA256 哈希存储
+  authKey     String   @map("auth_key")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model User {
+  id              String    @id @default(cuid()) @map("user_id") // 用户ID，通过初始化脚本生成8位数字显示ID
+  userId8Digit    String    @unique @map("user_id_8digit") // 8位数字用户ID（显示用）
+  username        String    @unique @map("username") // 8位字母随机用户名
+  openid          String    @unique
+  nickname        String?   @map("wechat_name") // 微信名
+  avatar          String?
+  userType        String    @default("free") @map("user_type") // free, premium
+  status          String    @default("offline") @map("status") // online, offline
+  canLogin        Boolean   @default(true) @map("can_login") // 是否可登录
+  paymentType     String?   @map("payment_type") // 付费方式：1_month, 3_month, 6_month, 12_month, null
+  expireTime      DateTime? @map("expire_time") // 付费到期时间
+  lastLoginTime   DateTime? @map("last_login_time") // 最近登录时间
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // 关联支付订单
+  paymentOrders   PaymentOrder[]
+  // 关联任务
+  tasks           Task[]
+
+  @@map("users")
+}
+
+// 微信配置表
+model WechatConfig {
+  id              Int      @id @default(autoincrement())
+  configType      String   @map("config_type") // login, payment
+  appId           String?  @map("app_id")
+  appSecret       String?  @map("app_secret")
+  callbackUrl     String?  @map("callback_url")
+  merchantId      String?  @map("merchant_id") // 商户号
+  merchantKey     String?  @map("merchant_key") // 商户密钥
+  payCallbackUrl  String?  @map("pay_callback_url") // 支付回调URL
+  certPath        String?  @map("cert_path") // 证书路径
+  keyPath         String?  @map("key_path") // 私钥路径
+  status          String   @default("disabled") @map("status") // enabled, disabled
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([configType])
+  @@map("wechat_config")
+}
+
+// 支付订单表
+model PaymentOrder {
+  id              String    @id @default(cuid()) @map("order_id")
+  userId          String    @map("user_id")
+  orderNo         String    @unique @map("order_no") // 商户订单号
+  wechatOrderId   String?   @map("wechat_order_id") // 微信订单号
+  paymentType     String    @map("payment_type") // 1_month, 3_month, 6_month, 12_month
+  amount          Int       @map("amount") // 金额（分）
+  status          String    @default("pending") @map("status") // pending, paid, failed, expired
+  qrCode          String?   @map("qr_code") // 二维码内容
+  qrCodeUrl       String?   @map("qr_code_url") // 二维码图片URL
+  qrExpireTime    DateTime? @map("qr_expire_time") // 二维码过期时间
+  paidTime        DateTime? @map("paid_time") // 支付时间
+  expireTime      DateTime? @map("expire_time") // 订单过期时间
+  notifyData      String?   @map("notify_data") @db.Text // 微信回调数据
+  remark          String?   @map("remark") // 备注
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // 关联用户
+  user            User      @relation(fields: [userId], references: [id])
+
+  @@map("payment_orders")
+}
+
+// 任务表
+model Task {
+  id              String    @id @default(cuid()) @map("task_id")
+  taskId8Digit    String    @unique @map("task_id_8digit") // 8位数字任务ID（显示用）
+  taskName        String    @map("task_name") // 任务名称
+  taskType        String    @map("task_type") // enterprise, industry (企业分析、行业分析)
+  companies       String    @map("companies") @db.Text // JSON格式存储企业信息 [{"code":"SZ300454","name":"深信服"}]
+  industryName    String?   @map("industry_name") // 行业名称（仅行业分析任务使用）
+  userId          String    @map("user_id") // 任务发起人
+  status          String    @default("analyzing") @map("status") // analyzing, completed, error
+  errorReason     String?   @map("error_reason") @db.Text // 错误原因
+  startTime       DateTime  @default(now()) @map("start_time") // 任务开始时间
+  endTime         DateTime? @map("end_time") // 任务结束时间
+  
+  // 分析节点状态 JSON格式存储
+  // {"collect_data": "in_progress", "calculate_data": "pending"}
+  // 状态: pending, in_progress, completed, error
+  analysisNodes   String    @map("analysis_nodes") @db.Text
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // 关联用户
+  user            User      @relation(fields: [userId], references: [id])
+
+  @@map("tasks")
+}
+
+// 企业财务数据表
+model CompanyFinancialData {
+  id              String    @id @default(cuid())
+  companyId       String    @map("company_id") // 企业ID/代码
+  companyName     String    @map("company_name") // 企业名称
+  companyCode     String    @map("company_code") // 企业代码
+  reportType      String    @map("report_type") // Q1, Q2, Q3, Q4
+  reportDate      DateTime  @map("report_date") // 报告日期
+  reportName      String    @map("report_name") // 报告名称
+  dataType        String    @map("data_type") // balance, income, cashflow (资产负债表、利润表、现金流表)
+  
+  // 财务数据JSON格式存储，包含所有财务指标
+  financialData   String    @map("financial_data") @db.LongText
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([companyId, reportType, reportDate, dataType])
+  @@index([companyId, dataType])
+  @@map("company_financial_data")
+}
+
+// 企业财务指标表
+model CompanyFinancialIndicators {
+  id              String    @id @default(cuid())
+  companyId       String    @map("company_id") // 企业ID/代码
+  companyName     String    @map("company_name") // 企业名称
+  companyCode     String    @map("company_code") // 企业代码
+  reportType      String    @map("report_type") // Q1, Q2, Q3, Q4
+  reportDate      DateTime  @map("report_date") // 报告日期
+  
+  // 计算出的财务指标JSON格式存储，按类别分组
+  profitabilityIndicators     String?   @map("profitability_indicators") @db.Text // 盈利能力指标
+  cashFlowIndicators         String?   @map("cash_flow_indicators") @db.Text // 现金流量指标
+  solvencyIndicators         String?   @map("solvency_indicators") @db.Text // 偿债能力指标
+  operatingEfficiencyIndicators String? @map("operating_efficiency_indicators") @db.Text // 运营效率指标
+  growthIndicators           String?   @map("growth_indicators") @db.Text // 成长能力指标
+  dupontIndicators           String?   @map("dupont_indicators") @db.Text // 杜邦分析指标
+  qualityIndicators          String?   @map("quality_indicators") @db.Text // 财务质量指标
+  valuationIndicators        String?   @map("valuation_indicators") @db.Text // 市场估值指标
+  riskIndicators             String?   @map("risk_indicators") @db.Text // 风险控制指标
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([companyId, reportType, reportDate])
+  @@index([companyId])
+  @@map("company_financial_indicators")
+}
+
+// 企业AI分析表
+model CompanyAiAnalysis {
+  id              String    @id @default(cuid())
+  companyId       String    @map("company_id") // 企业ID/代码
+  companyName     String    @map("company_name") // 企业名称
+  companyCode     String    @map("company_code") // 企业代码
+  reportDate      DateTime  @map("report_date") // 基准报告日期
+  
+  // AI分析结果JSON格式存储
+  financialDataAnalysis     String?   @map("financial_data_analysis") @db.LongText // 整体财报数据AI分析
+  financialIndicatorAnalysis String?  @map("financial_indicator_analysis") @db.LongText // 财务指标AI分析
+  
+  // AI分析的原始数据快照（用于审计和重新分析）
+  analysisDataSnapshot      String?   @map("analysis_data_snapshot") @db.LongText
+  
+  // 分析状态
+  analysisStatus   String    @default("pending") @map("analysis_status") // pending, in_progress, completed, error
+  errorMessage     String?   @map("error_message") @db.Text // 错误信息
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([companyId, reportDate])
+  @@index([companyId])
+  @@map("company_ai_analysis")
+}
+
+// AI分析建议缓存表
+model AiAnalysisCache {
+  id              String    @id @default(cuid())
+  companyCode     String    @map("company_code") // 公司代码
+  companyName     String?   @map("company_name") // 公司名称
+  analysisType    String    @map("analysis_type") // 分析类型：financial_data, financial_indicators, indicator_detail
+  dataItem        String?   @map("data_item") // 具体数据项目（如指标名称）
+  reportPeriod    String    @map("report_period") // 报告期：Q1, Q2, Q3, Q4, lastdate等
+  timeRange       String    @map("time_range") // 时间范围：最近1年, 最近3年, 最近5年等
+  queryHash       String    @unique @map("query_hash") // 查询条件的哈希值，用于快速匹配
+  
+  // AI分析结果
+  aiAnalysis      String?   @map("ai_analysis") @db.LongText // AI分析结果内容
+  analysisStatus  String    @default("pending") @map("analysis_status") // pending, completed, failed
+  
+  // 缓存相关
+  expiresAt       DateTime  @map("expires_at") // 缓存过期时间（3个月后）
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([companyCode, analysisType])
+  @@index([queryHash])
+  @@index([expiresAt])
+  @@map("ai_analysis_cache")
+}
+
+ 

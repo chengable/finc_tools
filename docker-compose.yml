@@ -1,0 +1,108 @@
+# 移除 version 字段以避免 compose 警告
+
+services:
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: finc-tools-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # 宿主机端口8000映射到容器端口8000
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - finc-tools
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - finc-network
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+
+  # Next.js 应用
+  finc-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # 构建优化
+      args:
+        - NODE_ENV=production
+        - BUILDKIT_INLINE_CACHE=1
+      # 网络配置
+      network: host
+      # 构建时的网络设置
+      extra_hosts:
+        - "mirrors.aliyun.com:47.246.46.65"
+        - "mirrors.tuna.tsinghua.edu.cn:101.6.15.130"
+        - "dl-cdn.alpinelinux.org:146.75.114.133"
+    image: finc-tools:latest
+    container_name: finc-tools-app
+    restart: unless-stopped
+    expose:
+      - "3000"  # 只在内部网络暴露端口
+    # 使用env_file简化环境变量管理
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - finc-network
+    volumes:
+      # 持久化日志数据
+      - ./logs:/app/logs
+      # 如果需要上传文件存储
+      - ./uploads:/app/uploads
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # 安全配置
+    security_opt:
+      - no-new-privileges:true
+    # 只读根文件系统（除了必要的挂载点）
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache
+      - /var/run
+
+volumes:
+  nginx_logs:
+    driver: local
+  nginx_cache:
+    driver: local
+
+networks:
+  finc-network:
+    driver: bridge
+    # 网络配置优化
+    driver_opts:
+      com.docker.network.bridge.name: finc-br0
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

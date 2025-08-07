@@ -1,0 +1,92 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime
+*.pid
+*.seed
+*.pid.lock
+*.log
+logs/
+*.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output
+
+# Misc
+.npm
+.eslintcache
+.cache
+.temp
+temp
+tmp/
+
+# Git
+.git
+.gitignore
+README.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+*.dockerfile
+
+# Scripts (keep only essential ones)
+deploy.sh
+quick-start.sh
+
+# Documentation
+docs
+*.md
+!README.md
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backups
+backups/
+
+# Uploads
+uploads/
+
+# Scripts
+*.sh
+
+# Compression files
+*.tar
+*.tar.gz
+*.zip
+
+# AI provider state file
+.ai-provider-state.json 
