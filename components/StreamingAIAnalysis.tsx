@@ -18,7 +18,7 @@ export default function StreamingAIAnalysis({ taskId, analysisType, title, userT
   const [currentAnalysisType, setCurrentAnalysisType] = useState(analysisType);
   
   // 检查用户权限
-  const hasAiPermission = userType === 'premium' || userType === 'admin' || username === 'developer';
+  const hasAiPermission = userType === 'premium' || userType === 'admin';
 
   // 当analysisType变化时重置组件状态
   useEffect(() => {

@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import TopHeader from '../components/TopHeader'
 import axios from 'axios'
+import { WebSiteStructuredData, OrganizationStructuredData, WebApplicationStructuredData } from '../components/StructuredData'
 
 interface UserStatus {
   isLoggedIn: boolean
@@ -56,13 +57,55 @@ export default function Home() {
     router.push('/tasks')
   }
 
+  const handleFinancialAIAgent = () => {
+    router.push('/financial-ai-agent')
+  }
+
   return (
     <>
       <Head>
-        <title>FINC AI智能财报分析 - 专业财务数据洞察</title>
-        <meta name="description" content="基于先进人工智能技术的专业财务数据分析平台，深度覆盖国内全市场上市公司" />
+        <title>FINC AI智能财报分析 - 专业财务数据洞察平台</title>
+        <meta name="description" content="FINC AI智能财报分析平台，基于先进人工智能技术提供专业财务数据分析，深度覆盖A股、港股、美股市场上市公司，提供智能化财报解读、精准风险评估、专业投资建议" />
+        <meta name="keywords" content="财报分析,AI智能分析,财务数据,投资分析,股票分析,上市公司,财务指标,风险评估,投资建议,A股,港股,美股" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="FINC AI智能财报分析平台" />
+        <meta name="language" content="zh-CN" />
+        <meta name="revisit-after" content="1 days" />
+        
+        {/* Open Graph 通用分享优化 */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={process.env.NEXT_PUBLIC_SITE_URL || ''} />
+        <meta property="og:title" content="FINC AI智能财报分析 - 专业财务数据洞察平台" />
+        <meta property="og:description" content="基于先进人工智能技术的专业财务数据分析平台，深度覆盖A股、港股、美股市场上市公司，提供智能化财报解读、精准风险评估、专业投资建议" />
+        <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/og-image.jpg`} />
+        <meta property="og:site_name" content="FINC AI智能财报分析" />
+        <meta property="og:locale" content="zh_CN" />
+        
+        {/* 微博分享优化 */}
+        <meta property="weibo:webpage:create_at" content="1735027200" />
+        <meta property="weibo:webpage:update_at" content={Math.floor(Date.now() / 1000).toString()} />
+        <meta property="weibo:article:create_at" content="1735027200" />
+        <meta property="weibo:article:update_at" content={Math.floor(Date.now() / 1000).toString()} />
+        
+        {/* 百度相关 */}
+        <meta name="baidu-site-verification" content="" />
+        <meta name="applicable-device" content="pc,mobile" />
+        
+        {/* 移动端优化 */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        
+        {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+        
+        {/* 结构化数据 */}
+        <WebSiteStructuredData />
+        <OrganizationStructuredData />
+        <WebApplicationStructuredData />
       </Head>
 
       <div className="min-h-screen text-white" style={{
@@ -221,6 +264,28 @@ export default function Home() {
                 </p>
               </div>
 
+              {/* 财报智能体 */}
+              <div className="p-8 rounded-2xl border border-purple-500/30 hover:border-green-500/50 transition-all transform hover:-translate-y-2 hover:scale-105 cursor-pointer"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.8) 0%, rgba(83, 52, 131, 0.6) 50%, rgba(34, 197, 94, 0.4) 100%)',
+                  boxShadow: '0 0 20px rgba(123, 44, 191, 0.3), 0 0 40px rgba(34, 197, 94, 0.2)'
+                }}
+                onClick={handleFinancialAIAgent}
+              >
+                <div className="w-16 h-16 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-full flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-white">财报智能体</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  全新的AI财报分析助手，提供智能对话式财务分析服务。支持自然语言查询企业财务状况，实时获取专业投资建议，财务数据分析从未如此简单便捷。专业版专属功能，让AI成为您的专属财务顾问。
+                </p>
+                <div className="mt-4 text-sm text-yellow-400 font-semibold">
+                  点击体验 →
+                </div>
+              </div>
+
               {/* 极致性价比 */}
               <div className="p-8 rounded-2xl border border-purple-500/30 hover:border-green-500/50 transition-all transform hover:-translate-y-2 hover:scale-105"
                 style={{
@@ -235,7 +300,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-white">极致性价比</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  专业版提供多种套餐选择：1个月¥12、3个月¥30、6个月¥60、12个月¥100，相比市场同类产品节省80%以上成本。提供50个分析任务额度、完整的分项AI建议、深度行业对比分析、10年历史数据图表等高级功能，让每个投资者都能以最低成本享受机构级财务分析服务。
+                  专业版提供多种套餐选择：1个月¥8、3个月¥20、6个月¥35、12个月¥70，相比市场同类产品节省80%以上成本。提供50个分析任务额度、完整的分项AI建议、深度行业对比分析、10年历史数据图表等高级功能，让每个投资者都能以最低成本享受机构级财务分析服务。
                 </p>
               </div>
             </div>
@@ -308,10 +373,10 @@ export default function Home() {
                         <td className="px-6 py-4 text-gray-300 font-medium">价格</td>
                         <td className="px-6 py-4 text-center text-green-400 font-bold">免费</td>
                         <td className="px-6 py-4 text-center">
-                          <div className="text-green-400 font-bold text-sm mb-1">1个月 ¥12</div>
-                          <div className="text-green-400 font-bold text-sm mb-1">3个月 ¥30</div>  
-                          <div className="text-green-400 font-bold text-sm mb-1">6个月 ¥60</div>
-                          <div className="text-green-400 font-bold text-sm">12个月 ¥100</div>
+                          <div className="text-green-400 font-bold text-sm mb-1">1个月 ¥8</div>
+                          <div className="text-green-400 font-bold text-sm mb-1">3个月 ¥20</div>  
+                          <div className="text-green-400 font-bold text-sm mb-1">6个月 ¥35</div>
+                          <div className="text-green-400 font-bold text-sm">12个月 ¥70</div>
                         </td>
                       </tr>
                     </tbody>
@@ -418,4 +483,4 @@ export default function Home() {
       </div>
     </>
   )
-} 
+}

@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const decoded = verifyToken(token)
-    if (!decoded || decoded.username !== 'developer') {
+    if (!decoded || decoded.userType !== 'admin') {
       return res.status(403).json({ success: false, message: '仅管理员可执行此操作' })
     }
 

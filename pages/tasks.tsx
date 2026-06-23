@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import TopHeader from '../components/TopHeader';
 
 interface Company {
@@ -32,7 +33,7 @@ interface User {
   id: string;
   username: string;
   nickname?: string;
-  userType: 'free' | 'professional' | 'admin';
+  userType: 'free' | 'premium' | 'admin';
 }
 
 interface TaskListResponse {
@@ -453,20 +454,38 @@ export default function TasksPage() {
 
   // 判断是否可以选择行业分析
   const canSelectIndustryAnalysis = () => {
-    return user?.userType === 'professional' || user?.userType === 'admin';
+    return user?.userType === 'premium' || user?.userType === 'admin';
   };
 
   // 获取任务数量限制提示
   const getTaskLimitHint = () => {
     if (!user) return '';
     if (user.userType === 'free') return `免费版用户最多创建2个任务（当前${totalTasks}/2）`;
-    if (user.userType === 'professional') return `专业版用户最多创建50个任务（当前${totalTasks}/50）`;
+    if (user.userType === 'premium') return `专业版用户最多创建50个任务（当前${totalTasks}/50）`;
     return '管理员用户无任务数量限制';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-green-900">
-      <TopHeader />
+    <>
+      <Head>
+        <title>AI财报分析任务 - FINC智能财务分析平台</title>
+        <meta name="description" content="查看和管理您的AI财报分析任务，实时跟踪分析进度，获取专业的财务数据洞察。支持企业分析和行业对比分析。" />
+        <meta name="keywords" content="财报分析任务,AI分析,财务数据,企业分析,行业分析,投资决策,财务报告" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="AI财报分析任务 - FINC智能财务分析平台" />
+        <meta property="og:description" content="查看和管理您的AI财报分析任务，实时跟踪分析进度，获取专业的财务数据洞察。" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/tasks`} />
+        {/* 微博分享优化 */}
+        <meta property="weibo:webpage:create_at" content="1735027200" />
+        <meta property="weibo:webpage:update_at" content={Math.floor(Date.now() / 1000).toString()} />
+        <meta name="baidu-site-verification" content="codeva-finc-tasks" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/tasks`} />
+      </Head>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-green-900">
+        <TopHeader />
       
       <div className="container mx-auto px-4 py-8 pt-20">
         {/* 统计信息展示区域 - 超紧凑单行设计 */}
@@ -1053,5 +1072,6 @@ export default function TasksPage() {
         )}
       </div>
     </div>
+    </>
   );
-} 
+}

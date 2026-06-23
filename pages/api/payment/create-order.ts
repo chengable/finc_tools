@@ -55,19 +55,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch (paymentType) {
       case '1_month':
-        amount = 1200 // 12元
+        amount = 800 // 8元
         body = 'FINC AI财报分析-1个月专家版'
         break
       case '3_month':
-        amount = 3000 // 30元
+        amount = 2000 // 20元
         body = 'FINC AI财报分析-3个月专家版'
         break
       case '6_month':
-        amount = 6000 // 60元
+        amount = 3500 // 35元
         body = 'FINC AI财报分析-6个月专家版'
         break
       case '12_month':
-        amount = 10000 // 100元
+        amount = 7000 // 70元
         body = 'FINC AI财报分析-12个月专家版'
         break
       default:
@@ -114,4 +114,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('创建支付订单API错误:', error)
     return res.status(500).json({ success: false, message: '服务器内部错误' })
   }
-} 
+}

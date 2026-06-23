@@ -1,0 +1,51 @@
+# Robots.txt for FINC AI智能财报分析平台
+# 允许所有搜索引擎爬取网站内容
+
+User-agent: *
+Allow: /
+
+# 禁止爬取敏感目录
+Disallow: /admin-control
+Disallow: /_next/
+Disallow: /uploads/
+Disallow: /logs/
+
+# 允许爬取重要页面
+Allow: /
+Allow: /tasks
+Allow: /login
+Allow: /payment
+
+# 指定站点地图位置
+Sitemap: https://www.your-domain.com/sitemap.xml
+Sitemap: https://www.your-domain.com/api/sitemap.xml
+
+# 针对百度搜索引擎的特殊配置
+User-agent: Baiduspider
+Allow: /
+Disallow: /api/
+Disallow: /admin-control
+Disallow: /developer/
+Crawl-delay: 1
+
+# 针对Google搜索引擎的配置
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin-control
+Disallow: /developer/
+
+# 针对其他主要搜索引擎
+User-agent: Sogou web spider
+Allow: /
+Disallow: /api/
+Disallow: /admin-control
+Disallow: /developer/
+Crawl-delay: 2
+
+User-agent: 360Spider
+Allow: /
+Disallow: /api/
+Disallow: /admin-control
+Disallow: /developer/
+Crawl-delay: 2

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import TopHeader from '../components/TopHeader'
@@ -49,8 +49,21 @@ export default function WechatLogin() {
   return (
     <>
       <Head>
-        <title>微信登录 - FINC AI智能财报分析</title>
-        <meta name="description" content="使用微信登录，开启您的财务分析之旅" />
+        <title>微信登录 - FINC AI智能财报分析平台</title>
+        <meta name="description" content="使用微信账号快速登录FINC AI智能财报分析平台，享受专业的财务数据分析服务，开启您的投资决策之旅。" />
+        <meta name="keywords" content="微信登录,财报分析,AI分析,投资决策,财务数据,用户登录" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="微信登录 - FINC AI智能财报分析平台" />
+        <meta property="og:description" content="使用微信账号快速登录FINC AI智能财报分析平台，享受专业的财务数据分析服务。" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/login`} />
+        {/* 微博分享优化 */}
+        <meta property="weibo:webpage:create_at" content="1735027200" />
+        <meta property="weibo:webpage:update_at" content={Math.floor(Date.now() / 1000).toString()} />
+        <meta name="baidu-site-verification" content="codeva-finc-login" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/login`} />
         <style jsx>{`
           .wechat-login-btn:hover:not(:disabled) {
             background-color: #059652 !important;
@@ -132,4 +145,4 @@ export default function WechatLogin() {
       </div>
     </>
   )
-} 
+}

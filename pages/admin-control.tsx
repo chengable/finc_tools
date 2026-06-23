@@ -1158,7 +1158,7 @@ function WechatConfig({ configs, onSaveConfig }: WechatConfigProps) {
               value={loginConfig.callbackUrl}
               onChange={(e) => setLoginConfig({...loginConfig, callbackUrl: e.target.value})}
               className="bg-gradient-to-r from-slate-800/90 to-purple-800/70 border border-purple-500/50 w-full px-4 py-3 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-green-500/80 focus:ring-2 focus:ring-green-500/30 transition-all"
-              placeholder="https://finc.ai/api/wechat/callback"
+              placeholder="https://your-domain.com/api/wechat/callback"
             />
           </div>
           <div>
@@ -1232,7 +1232,7 @@ function WechatConfig({ configs, onSaveConfig }: WechatConfigProps) {
               value={paymentConfig.payCallbackUrl}
               onChange={(e) => setPaymentConfig({...paymentConfig, payCallbackUrl: e.target.value})}
               className="bg-gradient-to-r from-slate-800/90 to-purple-800/70 border border-purple-500/50 w-full px-4 py-3 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:border-green-500/80 focus:ring-2 focus:ring-green-500/30 transition-all"
-              placeholder="https://finc.ai/api/wechat/pay/callback"
+              placeholder="https://your-domain.com/api/wechat/pay/callback"
             />
           </div>
           <div>
@@ -1606,4 +1606,4 @@ function WechatConfig({ configs, onSaveConfig }: WechatConfigProps) {
       )}
     </div>
   )
-} 
+}

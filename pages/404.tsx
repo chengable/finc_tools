@@ -6,7 +6,12 @@ export default function Custom404() {
   return (
     <>
       <Head>
-        <title>404 - 页面未找到</title>
+        <title>404 - 页面未找到 | FINC AI智能财报分析平台</title>
+        <meta name="description" content="抱歉，您访问的页面不存在。请返回FINC AI智能财报分析平台首页，继续您的财务数据分析之旅。" />
+        <meta name="keywords" content="404错误,页面未找到,FINC,财报分析" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || ''} />
       </Head>
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
@@ -42,4 +47,4 @@ export default function Custom404() {
       </div>
     </>
   )
-} 
+}

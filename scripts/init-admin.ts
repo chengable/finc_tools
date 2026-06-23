@@ -6,9 +6,18 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('开始初始化管理员用户...')
 
+  const adminUsername = process.env.ADMIN_USERNAME || 'admin'
+  const adminPassword = process.env.ADMIN_PASSWORD
+  const adminAuthKey = process.env.ADMIN_AUTH_KEY
+
+  if (!adminPassword || !adminAuthKey) {
+    console.error('错误: 请设置 ADMIN_PASSWORD 和 ADMIN_AUTH_KEY 环境变量')
+    process.exit(1)
+  }
+
   // 检查管理员用户是否已存在
   const existingAdmin = await prisma.adminUser.findUnique({
-    where: { username: 'developer' }
+    where: { username: adminUsername }
   })
 
   if (existingAdmin) {
@@ -16,14 +25,13 @@ async function main() {
     return
   }
 
-  // 创建管理员用户
-  const hashedPassword = hashPassword('cheng123')
-  
+  const hashedPassword = hashPassword(adminPassword)
+
   const adminUser = await prisma.adminUser.create({
     data: {
-      username: 'developer',
+      username: adminUsername,
       password: hashedPassword,
-      authKey: 'developer_finctools'
+      authKey: adminAuthKey
     }
   })
 
@@ -41,4 +49,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect()
-  }) 
+  })

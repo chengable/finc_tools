@@ -20,7 +20,7 @@ export default async function handler(
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || '');
     } catch (error) {
       return res.status(401).json({ message: '登录状态已过期' });
     }
@@ -33,8 +33,7 @@ export default async function handler(
     // 如果找不到普通用户，且userid看起来是数字(可能是AdminUser的ID)，尝试查找管理员
     if (!user && /^\d+$/.test(decoded.userId)) {
       user = await prisma.user.findFirst({
-        where: { 
-          username: 'developer',
+        where: {
           userType: 'admin'
         }
       });
@@ -71,7 +70,7 @@ export default async function handler(
     }
 
     // 检查权限：只有任务创建者或管理员可以查看
-    if (task.userId !== user.id && user.username !== 'developer') {
+    if (task.userId !== user.id && user.userType !== 'admin') {
       return res.status(403).json({ 
         success: false,
         message: '无权限查看此任务' 

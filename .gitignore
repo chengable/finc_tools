@@ -27,6 +27,40 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.docker
+
+# backups (contains sensitive data)
+/backups/
+
+# runtime state files
+.ai-provider-state.json
+
+# personal scripts (not for distribution)
+deploy.sh
+gituse.sh
+docker-build.config
+quick-start.sh
+test-docker-build.sh
+
+# one-off maintenance scripts
+scripts/backup_database.sh
+scripts/run-fix-cash-ratio.sh
+scripts/fix-cash-ratio-indicators.ts
+scripts/update-payment-types.ts
+
+# large binary files
+nginx-alpine.tar
+*.tar
+
+# personal assets
+public/wechat-qr.jpg
+
+# Claude Code internal
+.claude/
+
+# empty / unused dirs
+apisix_conf/
+docs/
 
 # vercel
 .vercel

@@ -250,15 +250,15 @@ export default function Payment() {
   const getPaymentPrice = () => {
     switch (paymentType) {
       case '1_month':
-        return { primary: '1个月 ¥12', secondary: '', desc: '单月套餐，到期后需重新购买' }
+        return { primary: '1个月 ¥8', secondary: '', desc: '单月套餐，到期后需重新购买' }
       case '3_month':
-        return { primary: '3个月 ¥30', secondary: '', desc: '三月套餐，平均每月¥10' }
+        return { primary: '3个月 ¥20', secondary: '', desc: '三月套餐，平均每月¥6.7' }
       case '6_month':
-        return { primary: '6个月 ¥60', secondary: '', desc: '六月套餐，平均每月¥10' }
+        return { primary: '6个月 ¥35', secondary: '', desc: '六月套餐，平均每月¥5.8' }
       case '12_month':
-        return { primary: '12个月 ¥100', secondary: '', desc: '年度套餐，平均每月¥8.3' }
+        return { primary: '12个月 ¥70', secondary: '', desc: '年度套餐，平均每月¥5.8' }
       default:
-        return { primary: '1个月 ¥12', secondary: '', desc: '单月套餐，到期后需重新购买' }
+        return { primary: '1个月 ¥8', secondary: '', desc: '单月套餐，到期后需重新购买' }
     }
   }
 
@@ -635,4 +635,4 @@ export default function Payment() {
       </div>
     </>
   )
-} 
+}

@@ -4,7 +4,13 @@ import { createHash } from 'crypto'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'chenableismroesecgoodwork'
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET 环境变量未配置');
+  }
+  return secret;
+}
 
 export interface JWTPayload {
   userId: string
@@ -15,13 +21,13 @@ export interface JWTPayload {
 
 // 生成JWT token
 export const generateToken = (payload: JWTPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: '7d' })
 }
 
 // 验证JWT token
 export const verifyToken = (token: string): JWTPayload | null => {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload
+    return jwt.verify(token, getJwtSecret()) as JWTPayload
   } catch (error) {
     return null
   }

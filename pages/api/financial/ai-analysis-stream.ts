@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../lib/prisma';
-import { MultiAIProvider } from '../../../lib/ai-provider';
+import { createOpenAIClient } from '../../../lib/ai-provider';
 import { 
   getCachedAnalysis, 
   saveAnalysisToCache, 
@@ -27,7 +27,7 @@ export default async function handler(
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || '');
     } catch (error) {
       return res.status(401).json({ message: '登录状态已过期' });
     }
@@ -39,8 +39,7 @@ export default async function handler(
 
     if (!user && /^\d+$/.test(decoded.userId)) {
       user = await prisma.user.findFirst({
-        where: { 
-          username: 'developer',
+        where: {
           userType: 'admin'
         }
       });
@@ -54,7 +53,7 @@ export default async function handler(
     }
 
     // 检查用户权限
-    if (user.userType !== 'premium' && user.userType !== 'admin' && user.username !== 'developer') {
+    if (user.userType !== 'premium' && user.userType !== 'admin') {
       return res.status(403).json({ 
         success: false,
         message: '此功能仅限付费版用户和管理员使用' 
@@ -81,7 +80,7 @@ export default async function handler(
     }
 
     // 检查权限
-    if (decoded.userType !== 'admin' && task.userId !== decoded.userId && user.username !== 'developer') {
+    if (decoded.userType !== 'admin' && task.userId !== decoded.userId) {
       return res.status(403).json({ message: '无权访问此任务' });
     }
 
@@ -224,69 +223,40 @@ async function generateAIAnalysis(
   pendingCacheId: string | null
 ) {
   const prompt = await buildPrompt(task, companies, analysisType);
-  
-  // 轮询使用不同的AI提供商
-  const provider = await MultiAIProvider.getNextProvider();
-  const client = MultiAIProvider.createClient(provider);
-  const modelName = MultiAIProvider.getModelName(provider);
-  
-  console.log(`使用 ${provider} 提供商进行AI分析，模型: ${modelName}`);
-  
+
+  // 使用 OpenAI-compatible API
+  const { client, model } = createOpenAIClient();
+
+  console.log(`使用 OpenAI-compatible API 进行AI分析，模型: ${model}`);
+
   try {
-    // 根据不同提供商设置不同的流式调用参数
-    let completion;
-    if (provider === 'bailian') {
-      // 百炼API需要特殊的stream_options参数
-      completion = await client.chat.completions.create({
-        model: modelName,
-        messages: [
-          {
-            role: "system",
-            content: "你是一个专业的财务分析师，具有丰富的财务分析经验和深厚的行业知识。请基于提供的数据进行客观、专业的分析。"
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        stream: true,
-        stream_options: {
-          include_usage: true
+    const completion = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content: "你是一个专业的财务分析师，具有丰富的财务分析经验和深厚的行业知识。请基于提供的数据进行客观、专业的分析。"
         },
-        temperature: 0.7,
-        max_tokens: 2000
-      });
-    } else {
-      // 腾讯和火山引擎使用标准流式调用
-      completion = await client.chat.completions.create({
-        model: modelName,
-        messages: [
-          {
-            role: "system",
-            content: "你是一个专业的财务分析师，具有丰富的财务分析经验和深厚的行业知识。请基于提供的数据进行客观、专业的分析。"
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 2000
-      });
-    }
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      stream: true,
+      temperature: 0.7,
+      max_tokens: 2000
+    });
 
     let fullContent = "";
 
     // 流式处理响应
     for await (const chunk of completion) {
-      // 百炼API的特殊处理：最后一个chunk的choices字段可能为空数组
       if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
         const content = chunk.choices[0].delta?.content;
         if (content) {
           fullContent += content;
           res.write(content);
-          
+
           // 确保数据立即发送到客户端
           if ((res as any).flush) {
             (res as any).flush();
@@ -304,7 +274,7 @@ async function generateAIAnalysis(
     res.end();
 
   } catch (error) {
-    console.error(`${provider} AI分析失败:`, error);
+    console.error('AI分析失败:', error);
     throw error;
   }
 }

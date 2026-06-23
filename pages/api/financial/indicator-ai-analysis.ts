@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../lib/prisma';
-import { MultiAIProvider } from '../../../lib/ai-provider';
+import { createOpenAIClient } from '../../../lib/ai-provider';
 import { 
   getCachedAnalysis, 
   saveAnalysisToCache, 
@@ -27,7 +27,7 @@ export default async function handler(
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || '');
     } catch (error) {
       return res.status(401).json({ message: '登录状态已过期' });
     }
@@ -40,8 +40,7 @@ export default async function handler(
     // 如果找不到普通用户，且userid看起来是数字(可能是AdminUser的ID)，尝试查找管理员
     if (!user && /^\d+$/.test(decoded.userId)) {
       user = await prisma.user.findFirst({
-        where: { 
-          username: 'developer',
+        where: {
           userType: 'admin'
         }
       });
@@ -55,7 +54,7 @@ export default async function handler(
     }
 
     // 检查用户权限：只有付费版用户和管理员可以使用此功能
-    if (user.userType !== 'premium' && user.userType !== 'admin' && user.username !== 'developer') {
+    if (user.userType !== 'premium' && user.userType !== 'admin') {
       return res.status(403).json({ 
         success: false,
         message: '此功能仅限付费版用户和管理员使用' 
@@ -128,12 +127,10 @@ export default async function handler(
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-    // 轮询使用不同的AI提供商
-    const provider = await MultiAIProvider.getNextProvider();
-    const client = MultiAIProvider.createClient(provider);
-    const modelName = MultiAIProvider.getModelName(provider);
-    
-    console.log(`使用 ${provider} 提供商进行指标AI分析，模型: ${modelName}，公司: ${companyCode}`);
+    // 使用 OpenAI-compatible API
+    const { client, model } = createOpenAIClient();
+
+    console.log(`使用 OpenAI-compatible API 进行指标AI分析，模型: ${model}，公司: ${companyCode}`);
 
     // 构建分析提示词
     const trendDataText = trendData.map((item: any) => {
@@ -172,54 +169,28 @@ ${trendDataText}
 
     try {
       // 调用AI进行流式分析
-      let completion;
-      if (provider === 'bailian') {
-        // 百炼API需要特殊的stream_options参数
-        completion = await client.chat.completions.create({
-          model: modelName,
-          messages: [
-            {
-              role: "system",
-              content: "你是一位专业的财务分析师，擅长分析企业财务指标并给出投资建议。请基于提供的数据进行客观、专业的分析。请使用Markdown格式回复，包含适当的标题、列表和强调，让分析结果更易读。"
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          stream: true,
-          stream_options: {
-            include_usage: true
+      const completion = await client.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: "你是一位专业的财务分析师，擅长分析企业财务指标并给出投资建议。请基于提供的数据进行客观、专业的分析。请使用Markdown格式回复，包含适当的标题、列表和强调，让分析结果更易读。"
           },
-          temperature: 0.7,
-          max_tokens: 2000
-        });
-      } else {
-        // 腾讯和火山引擎使用标准流式调用
-        completion = await client.chat.completions.create({
-          model: modelName,
-          messages: [
-            {
-              role: "system",
-              content: "你是一位专业的财务分析师，擅长分析企业财务指标并给出投资建议。请基于提供的数据进行客观、专业的分析。请使用Markdown格式回复，包含适当的标题、列表和强调，让分析结果更易读。"
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          stream: true,
-          temperature: 0.7,
-          max_tokens: 2000
-        });
-      }
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 2000
+      });
 
       // 收集完整的AI响应以保存到缓存
       let fullAnalysis = '';
 
-      // 流式返回结果 - 兼容不同AI提供商
+      // 流式返回结果
       for await (const chunk of completion) {
-        // 百炼API的特殊处理：最后一个chunk的choices字段可能为空数组
         if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
           const content = chunk.choices[0].delta?.content;
           if (content) {
@@ -246,7 +217,7 @@ ${trendDataText}
       res.end();
 
     } catch (error) {
-      console.error(`${provider} AI分析失败:`, error);
+      console.error('AI分析失败:', error);
       
       // 标记缓存为失败状态
       if (pendingCacheId) {
@@ -255,7 +226,7 @@ ${trendDataText}
       
       // 发送错误信息
       const errorData = JSON.stringify({ 
-        content: `抱歉，AI分析服务暂时不可用，请稍后重试。\n\n**提供商**: ${provider}\n**错误信息**: ${(error as Error).message}`
+        content: `抱歉，AI分析服务暂时不可用，请稍后重试。\n\n**错误信息**: ${(error as Error).message}`
       });
       res.write(`data: ${errorData}\n\n`);
       res.write(`data: [DONE]\n\n`);

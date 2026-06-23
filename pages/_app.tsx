@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import React from 'react'
 import '../styles/globals.css'
+import PerformanceOptimizer from '../components/PerformanceOptimizer'
 
 // 错误边界组件
 class ErrorBoundary extends React.Component<
@@ -45,7 +46,8 @@ class ErrorBoundary extends React.Component<
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary>
+      <PerformanceOptimizer enableServiceWorker={true} />
       <Component {...pageProps} />
     </ErrorBoundary>
   )
-} 
+}

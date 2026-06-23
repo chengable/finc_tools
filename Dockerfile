@@ -71,6 +71,7 @@ COPY public ./public
 # 设置构建环境变量
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# NEXT_PUBLIC_FINANCIAL_AI_AGENT_URL 通过 docker-compose 运行时注入
 
 # 生成Prisma客户端
 RUN if [ -f "prisma/schema.prisma" ]; then npx prisma generate; fi
@@ -122,6 +123,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+# NEXT_PUBLIC_FINANCIAL_AI_AGENT_URL 通过 docker-compose 运行时注入
 
 # 复制构建产物（只复制必要文件）
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -130,6 +132,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # 如果有Prisma，复制生成的客户端
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+
+# 环境变量将在运行时通过docker-compose注入，不需要复制.env文件
 
 # 确保nextjs用户有写入/tmp的权限
 RUN chown -R nextjs:nodejs /tmp

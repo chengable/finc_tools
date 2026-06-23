@@ -18,9 +18,13 @@ function Error({ statusCode, hasGetInitialProps, err }: ErrorProps) {
       <Head>
         <title>
           {statusCode
-            ? `${statusCode} - 服务器错误`
-            : '客户端错误'}
+            ? `${statusCode} - 服务器错误 | FINC AI智能财报分析平台`
+            : '客户端错误 | FINC AI智能财报分析平台'}
         </title>
+        <meta name="description" content={`系统发生${statusCode || '未知'}错误，我们正在努力修复。请稍后重试或返回FINC AI智能财报分析平台首页。`} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || ''} />
       </Head>
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
@@ -86,4 +90,4 @@ Error.getInitialProps = ({ res, err }: ErrorPageContext) => {
   return { statusCode }
 }
 
-export default Error 
+export default Error

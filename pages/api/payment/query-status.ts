@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 验证订单所有者
-    if (order.userId !== decoded.userId && decoded.username !== 'developer') {
+    if (order.userId !== decoded.userId && decoded.userType !== 'admin') {
       return res.status(403).json({ success: false, message: '无权限查看此订单' })
     }
 

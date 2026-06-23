@@ -38,7 +38,7 @@ export default async function handler(
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || '');
     } catch (error) {
       return res.status(401).json({ 
         success: false,
@@ -81,11 +81,11 @@ export default async function handler(
       });
     }
 
-    // 免费用户只能选择企业分析
-    if (user.userType === 'free' && taskType === 'industry') {
-      return res.status(403).json({ 
+  // 只有专业版用户和管理员才能选择行业分析
+    if (taskType === 'industry' && user.userType !== 'premium' && user.userType !== 'admin') {
+      return res.status(403).json({
         success: false,
-        message: '免费用户只能选择企业分析' 
+        message: '行业分析功能仅适用于专业版用户'
       });
     }
 
@@ -114,8 +114,8 @@ export default async function handler(
     if (user.userType === 'premium') {
       maxTasks = 50;
     }
-    // 管理员用户developer无限制
-    if (user.userType === 'admin' || user.username === 'developer') {
+    // 管理员用户无限制
+    if (user.userType === 'admin') {
       maxTasks = Infinity;
     }
 

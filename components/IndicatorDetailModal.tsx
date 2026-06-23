@@ -83,7 +83,7 @@ const IndicatorDetailModal: React.FC<IndicatorDetailModalProps> = ({
   const aiAnalysisRef = useRef('');
   
   // 检查用户权限
-  const hasAiPermission = userType === 'premium' || userType === 'admin' || username === 'developer';
+  const hasAiPermission = userType === 'premium' || userType === 'admin';
 
   // 生成缓存key
   const generateCacheKey = (type: 'trend' | 'ai') => {

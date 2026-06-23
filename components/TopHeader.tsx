@@ -81,7 +81,7 @@ export default function TopHeader() {
       }
 
       // 从环境变量读取 TALLY_URL
-      const tallyUrl = process.env.NEXT_PUBLIC_TALLY_URL || 'https://hm.baidu.com/hm.js?1c74923412702ddbd76e031f562a69b6'
+      const tallyUrl = process.env.NEXT_PUBLIC_TALLY_URL || ''
       
       // 初始化百度统计
       window._hmt = window._hmt || []
@@ -249,7 +249,21 @@ export default function TopHeader() {
               }`}>
                 首页
               </Link>
-              
+
+              <button
+                onClick={() => handleLinkClick('/financial-ai-agent', false)}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  router.pathname === '/financial-ai-agent' ? 'text-white bg-purple-600' : 'text-gray-300 hover:text-white hover:bg-purple-500/30'
+                }`}
+              >
+                <span className="inline-flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                  财报智能体
+                </span>
+              </button>
+
               <button
                 onClick={() => handleLinkClick('/tasks', false)}
                 className="text-gray-300 hover:text-white hover:bg-purple-500/30 px-3 py-2 rounded-md text-sm font-medium transition-all"

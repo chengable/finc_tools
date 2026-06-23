@@ -2,147 +2,179 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## 项目概述
 
-**Core Development:**
-- `npm run dev` - Start development server on all interfaces (0.0.0.0)
-- `npm run build` - Build production bundle
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:push` - Push Prisma schema changes to database
-- `npm run db:studio` - Open Prisma Studio for database management
-- `npm run db:generate` - Generate Prisma client
+这是一个基于 Next.js 14 的金融数据分析平台，提供企业财务分析、AI 智能分析、微信登录支付等功能。项目采用 TypeScript 开发，使用 Prisma ORM 操作 MySQL 数据库，Redis 做缓存。
 
-**Database Scripts:**
-- `npm run init-admin` - Initialize admin user
-- `npm run init-db` - Initialize database
-- `npm run check-expired` - Check expired users
-- `npm run check-subscription` - Check subscription status
-- `npm run test-wechat-pay` - Test WeChat Pay configuration
-- `npm run cleanup-orders` - Clean up expired orders
+## 开发命令
 
-**Docker Deployment:**
-- `./deploy.sh start --rebuild` - Build and start all services
-- `./deploy.sh logs` - View container logs
-- `./deploy.sh stop` - Stop all services
-- `./deploy.sh clean` - Clean up Docker resources
+### 基础开发
+```bash
+npm run dev              # 启动开发服务器，监听所有网络接口
+npm run build           # 构建生产版本
+npm run start           # 启动生产服务器
+npm run lint            # 运行 ESLint 代码检查
+```
 
-## Architecture Overview
+### 数据库操作
+```bash
+npm run db:push         # 推送数据库 schema 变更到数据库
+npm run db:studio       # 打开 Prisma Studio 数据库管理界面
+npm run db:generate     # 生成 Prisma 客户端代码
+```
 
-**Core Technology Stack:**
-- Next.js 14 with TypeScript
-- Prisma ORM with MySQL database
-- Redis for caching
-- WeChat authentication and payment integration
-- OpenAI API for financial analysis
+### 管理脚本
+```bash
+npm run init-admin      # 初始化管理员账户
+npm run init-db         # 初始化数据库数据
+npm run check-expired   # 检查过期用户
+npm run check-subscription  # 检查订阅状态
+npm run test-wechat-pay  # 测试微信支付配置
+npm run cleanup-orders   # 清理过期订单
+```
 
-**Database Models:**
-- `User` - User accounts with WeChat integration and subscription management
-- `Task` - Financial analysis tasks (enterprise/industry analysis)
-- `CompanyFinancialData` - Raw financial data (balance sheet, income statement, cash flow)
-- `CompanyFinancialIndicators` - Calculated financial ratios and metrics
-- `CompanyAiAnalysis` - AI-generated financial analysis results
-- `PaymentOrder` - WeChat payment orders and subscription management
-- `AiAnalysisCache` - Cached AI analysis results with 3-month expiration
+## 项目架构
 
-**Key Directories:**
-- `pages/api/` - Next.js API routes organized by feature:
-  - `auth/wechat/` - WeChat OAuth authentication
-  - `financial/` - Financial data and AI analysis endpoints
-  - `tasks/` - Task management (create, list, delete, restart)
-  - `payment/` - WeChat Pay integration
-  - `admin/` - Admin management functions
-- `lib/` - Core business logic:
-  - `financial-config.ts` - Comprehensive financial field mappings and formatting
-  - `dataProcessingService.ts` - Financial data processing and calculations
-  - `ai-provider.ts` - OpenAI integration for financial analysis
-  - `wechat-pay.ts` - WeChat Pay SDK integration
-  - `redis.ts` - Redis caching utilities
-- `components/` - React components for financial data visualization
-- `scripts/` - Database initialization and maintenance scripts
+### 技术栈
+- **前端**: Next.js 14 + TypeScript + Tailwind CSS + Chart.js
+- **后端**: Next.js API Routes + Prisma ORM + MySQL + Redis
+- **认证**: JWT + 微信 OAuth
+- **支付**: 微信支付 API
+- **AI**: OpenAI-compatible API (支持任意兼容 OpenAI 的服务)
 
-**Financial Data System:**
-- Supports A-share, Hong Kong, and US stock markets
-- Field mappings between different market data formats in `lib/field-mappings/`
-- Automatic unit conversion (amounts to 100M yuan, ratios to percentages)
-- Comprehensive financial indicator calculations across 9 categories:
-  - Profitability, Cash Flow, Solvency, Operating Efficiency
-  - Growth, DuPont Analysis, Quality, Valuation, Risk
+### 目录结构
+```
+├── components/         # React 组件
+│   ├── FinancialDataTable.tsx    # 财务数据表格
+│   ├── StreamingAIAnalysis.tsx   # AI 分析流式组件
+│   ├── TopHeader.tsx             # 顶部导航
+│   └── SEOHead.tsx               # SEO 头部组件
+├── lib/                 # 核心业务逻辑
+│   ├── prisma.ts                   # Prisma 客户端
+│   ├── auth.ts                     # 认证相关
+│   ├── ai-provider.ts              # AI 服务提供者
+│   ├── wechat-pay.ts               # 微信支付
+│   ├── redis.ts                    # Redis 工具
+│   ├── financial-config.ts         # 财务配置
+│   └── ai-analysis-cache.ts        # AI 分析缓存
+├── pages/              # Next.js 页面
+│   ├── api/            # API 路由
+│   │   ├── auth/wechat/         # 微信认证
+│   │   ├── financial/           # 财务数据接口
+│   │   ├── tasks/               # 任务管理
+│   │   ├── payment/             # 支付接口
+│   │   └── admin/               # 管理接口
+│   ├── index.tsx               # 首页
+│   ├── login.tsx               # 登录页
+│   ├── tasks.tsx               # 任务列表
+│   ├── payment.tsx             # 支付页面
+│   └── admin-control.tsx       # 管理后台
+├── prisma/             # 数据库模型
+│   ├── schema.prisma           # 数据库模型定义
+│   └── migrations/             # 数据库迁移文件
+└── scripts/            # 数据库脚本
+    ├── init-admin.ts           # 初始化管理员
+    ├── init-db.ts              # 初始化数据库
+    └── check-expired-users.ts  # 检查过期用户
+```
 
-**AI Analysis Pipeline:**
-- Streaming AI analysis with real-time updates
-- Caching system with queryHash for efficient retrieval
-- Support for financial data analysis and indicator-specific insights
-- Analysis results stored as JSON in database for audit trails
+### 数据库模型主要关系
 
-**Authentication & Payment:**
-- WeChat OAuth for user authentication
-- Subscription-based access (1/3/6/12 month plans)
-- WeChat Pay integration with QR code generation
-- Admin interface for user management and payment configuration
+1. **User** - 用户表，包含微信登录信息、订阅状态
+2. **Task** - 任务表，关联用户，存储财务分析任务
+3. **CompanyFinancialData** - 企业财务原始数据
+4. **CompanyFinancialIndicators** - 计算后的财务指标
+5. **CompanyAiAnalysis** - AI 分析结果
+6. **PaymentOrder** - 支付订单，关联用户
+7. **AiAnalysisCache** - AI 分析结果缓存
 
-## Important Notes
+### 核心业务逻辑
 
-- All financial amounts are stored in database as actual values and converted to 100M yuan for display
-- Financial indicators use different storage formats (decimals vs percentages) - check `FIELD_UNITS` configuration
-- Task system supports both enterprise analysis (specific companies) and industry analysis
-- Redis is used for caching AI analysis results and session management
-- The application is containerized with Docker Compose for production deployment
-- Database schema uses MySQL with proper indexing for financial data queries
+#### 认证流程
+- 使用微信 OAuth 登录，获取用户信息
+- 生成 JWT token 存储在 cookie 中
+- 通过中间件验证用户身份
 
-## 环境变量
+#### 财务分析流程
+1. 用户创建分析任务（企业或行业分析）
+2. 系统收集财务数据（资产负债表、利润表、现金流量表）
+3. 计算 9 大类财务指标
+4. AI 进行智能分析并生成报告
+5. 结果存储在数据库并缓存
 
-本项目主要通过.env文件进行配置，以下为主要环境变量及其说明：
+#### 支付流程
+- 用户选择订阅套餐
+- 生成微信支付二维码
+- 用户扫码支付
+- 微信回调通知
+- 更新用户订阅状态
 
-- `DATABASE_URL`：MySQL数据库连接字符串
-- `REDIS_URL`：Redis连接字符串
-- `JWT_SECRET`：JWT签名密钥
-- `WECHAT_APP_ID`：微信开放平台AppID（用于微信登录）
-- `WECHAT_APP_SECRET`：微信开放平台AppSecret
-- `WECHAT_REDIRECT_URI`：微信登录回调地址
-- `WECHAT_PAY_APP_ID`：微信支付AppID
-- `WECHAT_PAY_MERCHANT_ID`：微信支付商户号
-- `WECHAT_PAY_API_KEY`：微信支付API密钥
-- `WECHAT_PAY_CERT_PATH`：微信支付API证书路径
-- `WECHAT_PAY_KEY_PATH`：微信支付API私钥路径
-- `WECHAT_PAY_NOTIFY_URL`：微信支付回调通知URL
-- `WECHAT_PAY_MERCHANT_CERTIFICATE_SERIAL`：微信支付V3证书序列号
-- `WECHAT_PAY_PLATFORM_PUBLIC_KEY_ID`：微信支付平台公钥ID
-- `WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH`：微信支付平台公钥路径
-- `XUEQIU_COOKIE`：雪球API访问所需Cookie
-- `DASHSCOPE_API_KEY`：百炼AI（DashScope）API密钥
-- `TENCENT_API_KEY`：腾讯大模型API密钥
-- `ARK_API_KEY`：火山引擎大模型API密钥
-- `NODE_ENV`：运行环境（如 production）
-- `NEXTAUTH_URL`：Next.js认证URL
-- `INIT_DATABASE`：是否初始化数据库（true/false）
-- `INIT_ADMIN`：是否初始化管理员（true/false）
-- `CHECK_EXPIRED`：是否检查过期用户（true/false）
-- `NEXT_TELEMETRY_DISABLED`：禁用Next.js遥测（1表示禁用）
-- `NEXT_PUBLIC_TALLY_URL`：前端埋点统计脚本URL
+### 环境变量配置
 
-> 建议：生产环境请勿将敏感信息（如密钥、密码）暴露在代码库，实际部署时请通过安全方式注入环境变量。
+项目需要配置以下关键环境变量：
 
----
+```env
+# 数据库
+DATABASE_URL="mysql://username:password@host:port/database"
 
-## 关键配置说明
+# Redis
+REDIS_URL="redis://username:password@host:port/db"
 
-### Next.js 配置
-- `reactStrictMode: true`：启用严格模式，提升开发体验。
-- `output: 'standalone'`：便于Docker等容器化部署。
-- `env`：通过process.env透传核心环境变量。
-- `images`：自定义图片尺寸，禁用fetchPriority属性以避免React警告。
+# JWT
+JWT_SECRET="your-jwt-secret"
 
-### Docker 构建优化（docker-build.config）
-- 启用BuildKit、构建缓存、多平台支持、日志和网络优化。
-- 支持自定义代理、DNS、构建超时等参数。
-- 推荐使用`docker compose`进行多服务编排。
+# 微信登录
+WECHAT_APP_ID="your-wechat-app-id"
+WECHAT_APP_SECRET="your-wechat-app-secret"
 
-### Nginx 配置
-- 反向代理Next.js应用，支持静态资源缓存、API路由、健康检查。
-- 启用Gzip压缩，支持Brotli（可选）。
-- 配置安全HTTP头，提升安全性。
-- 静态资源、API、主应用均有独立location配置，便于扩展。
-- 详细缓存策略，提升性能。
+# 微信支付
+WECHAT_MERCHANT_ID="your-merchant-id"
+WECHAT_MERCHANT_KEY="your-merchant-key"
 
----
+# AI 服务
+OPENAI_API_KEY="your-openai-api-key"
+OPENAI_BASE_URL="https://api.openai.com/v1"
+OPENAI_MODEL="gpt-4o-mini"
+```
+
+### 开发注意事项
+
+1. **数据库操作**: 使用 Prisma 客户端，所有数据库操作都要通过 Prisma
+2. **错误处理**: API 路由要有统一的错误处理和响应格式
+3. **缓存策略**: AI 分析结果使用 Redis 缓存，提高响应速度
+4. **安全性**:
+   - 所有 API 都要验证用户身份
+   - 敏感信息存储在环境变量中
+   - 微信支付回调需要验证签名
+5. **代码规范**: 使用 TypeScript 严格模式，所有函数都要有类型定义
+
+### 常见任务
+
+#### 添加新的财务指标
+1. 在 `lib/financial-config.ts` 中配置指标计算逻辑
+2. 更新 `prisma/schema.prisma` 中的 `CompanyFinancialIndicators` 模型
+3. 修改前端组件显示新指标
+
+#### 添加新的 AI 服务提供商
+1. 在 `lib/ai-provider.ts` 中添加新的 provider
+2. 实现统一的接口方法
+3. 更新环境变量配置
+
+#### 修改用户订阅逻辑
+1. 检查 `User` 模型的订阅相关字段
+2. 更新支付相关 API 路由
+3. 修改权限验证中间件
+
+### 部署
+
+项目使用 Docker 容器化部署：
+
+```bash
+# 开发环境
+docker compose -f docker-compose.dev.yml up -d
+
+# 生产环境
+docker compose -f docker-compose.prod.yml up -d
+```
+
+生产环境配置了 Nginx 反向代理，SSL 证书，以及性能优化。

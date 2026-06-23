@@ -54,7 +54,7 @@ export default function FinancialDataTable({ data, showSync, onIndicatorClick, u
   };
 
   // 检查用户权限
-  const hasPermission = userType === 'premium' || userType === 'admin' || username === 'developer';
+  const hasPermission = userType === 'premium' || userType === 'admin';
 
   // 判断数据类型 - 优先使用传递进来的dataType，否则根据数据结构判断
   const dataType: 'financial_data' | 'financial_indicators' = propDataType || (data.length > 0 && hasReportType(data[0]) ? 'financial_indicators' : 'financial_data');

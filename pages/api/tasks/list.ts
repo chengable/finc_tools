@@ -22,7 +22,7 @@ export default async function handler(
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || '');
     } catch (error) {
       return res.status(401).json({ 
         success: false,
@@ -37,10 +37,8 @@ export default async function handler(
 
     // 如果找不到普通用户，且userid看起来是数字(可能是AdminUser的ID)，尝试查找管理员
     if (!user && /^\d+$/.test(decoded.userId)) {
-      // 先尝试通过用户名查找User表中的管理员记录
       user = await prisma.user.findFirst({
-        where: { 
-          username: 'developer',
+        where: {
           userType: 'admin'
         }
       });
@@ -70,7 +68,7 @@ export default async function handler(
     const where: any = {};
 
     // 普通用户只能查看自己的任务，管理员可查看所有任务
-    if (user.username !== 'developer') {
+    if (user.userType !== 'admin') {
       where.userId = user.id;
     } else if (username) {
       // 管理员根据用户名搜索

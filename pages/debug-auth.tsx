@@ -120,7 +120,7 @@ export default function DebugAuth() {
             <h2 className="text-xl font-semibold mb-4">快速操作</h2>
             <div className="space-y-4">
               <button
-                onClick={() => window.location.href = '/developer/login'}
+                onClick={() => window.location.href = '/login'}
                 className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
               >
                 前往管理员登录
